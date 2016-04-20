@@ -55,16 +55,19 @@ public class BatimentController extends CadController {
 			// CNIL Niveau 2
 			queryBuilder.append("select distinct hab.annee, pb.jannat, pb.invar, pb.descr, pb.dniv, pb.dpor, pb.dvltrt, hab.ccoaff_lib, ");
 			queryBuilder.append("prop.comptecommunal, prop.dnupro, prop.ddenom, prop.dnomlp, prop.dprnlp, prop.epxnee, prop.dnomcp, prop.dprncp, ");
-			queryBuilder.append("COALESCE(NULLIF(prop.dnomlp||' '||trim(prop.epxnee)||' ', prop.dnomlp||'  '), '')||prop.ddenom as nom ");
+			queryBuilder.append("COALESCE(NULLIF(prop.dnomlp||' '||trim(prop.epxnee)||' ', prop.dnomlp||'  '), '')||prop.ddenom as nom, cnl.cconlc_lib as cconlc, pb.jannat, pb.jdatat ");
 			queryBuilder.append("from ");
 			queryBuilder.append(databaseSchema);
 			queryBuilder.append(".proprietebatie pb, ");
 			queryBuilder.append(databaseSchema);
 			queryBuilder.append(".proprietaire prop, ");
 			queryBuilder.append(databaseSchema);
-			queryBuilder.append(".deschabitation hab ");
+			queryBuilder.append(".deschabitation hab, ");
+			queryBuilder.append(databaseSchema);
+			queryBuilder.append(".bati_cconlc cnl ");
 			queryBuilder.append(" where pb.parcelle = ? ");
 			queryBuilder.append(" and pb.comptecommunal = prop.comptecommunal ");
+			queryBuilder.append(" and pb.cconlc = cnl.cconlc ");
 			queryBuilder.append(" and pb.dnubat = ? and hab.invar = pb.invar ;");
 			
 			//TODO order by numlot
