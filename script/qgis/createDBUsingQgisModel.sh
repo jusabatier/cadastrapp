@@ -138,6 +138,7 @@ replaceAndLaunch ../commun/tables/prop_dmatgm.sql
 replaceAndLaunch ../commun/tables/sf_cgrnum.sql
 replaceAndLaunch ../commun/tables/sf_cnatsp.sql
 replaceAndLaunch ../commun/tables/sf_dsgrpf.sql
+replaceAndLaunch ../commun/tables/bati_cconlc.sql
 
 # Launch views creation (views will use DBLINK extension, make sure it is enable on your database)
 replaceAndLaunch ./views/qgisCommune.sql
