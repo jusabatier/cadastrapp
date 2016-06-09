@@ -180,3 +180,4 @@ ALTER TABLE #schema_cadastrapp.parcelleDetails OWNER TO #user_cadastrapp;
 
 
 
+

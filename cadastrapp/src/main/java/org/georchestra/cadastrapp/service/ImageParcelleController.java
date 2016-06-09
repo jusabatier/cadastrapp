@@ -12,6 +12,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,12 +26,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.georchestra.cadastrapp.configuration.CadastrappPlaceHolder;
+import org.geotools.data.ows.HTTPClient;
 import org.geotools.data.ows.Layer;
+import org.geotools.data.ows.SimpleHttpClient;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
-import org.geotools.data.wfs.WFSDataStore;
-import org.geotools.data.wfs.WFSDataStoreFactory;
+import org.geotools.data.wfs.impl.WFSContentDataStore;
+import org.geotools.data.wfs.impl.WFSDataStoreFactory;
 import org.geotools.data.wms.WebMapServer;
 import org.geotools.data.wms.request.GetMapRequest;
 import org.geotools.data.wms.response.GetMapResponse;
@@ -65,7 +68,9 @@ public class ImageParcelleController extends CadController {
 
 	final private String URL_GET_CAPABILITIES_WMS = "?VERSION=1.1.1&Request=GetCapabilities&Service=WMS";
 
-	final private String CONNECTION_PARAM = "WFSDataStoreFactory:GET_CAPABILITIES_URL";
+	final private String GET_CAPABILITIES_URL_PARAM = "WFSDataStoreFactory:WFS_GET_CAPABILITIES_URL";
+	final private String USERNAME_PARAM = "WFSDataStoreFactory:USERNAME";
+	final private String PASSWORD_PARAM = "WFSDataStoreFactory:PASSWORD";
 	
 	// buffer distance in CRS unit
 	final private double BUFFER_DISTANCE = 10.0;
@@ -105,21 +110,35 @@ public class ImageParcelleController extends CadController {
 			final String wfsUrl = CadastrappPlaceHolder.getProperty("cadastre.wfs.url");
 
 			String getCapabilities = wfsUrl + URL_GET_CAPABILITIES;
-
+			
 			logger.debug("Call WFS with plot Id " + parcelle + " and WFS URL : " + getCapabilities);
 
-			Map<String, String> connectionParameters = new HashMap<String, String>();
-			connectionParameters.put(CONNECTION_PARAM, getCapabilities);
+			Map<String, Serializable> connectionParameters = new HashMap<String, Serializable>();
+			connectionParameters.put(GET_CAPABILITIES_URL_PARAM, getCapabilities);
+			
+			// Add basic authent parameter if not empty
+			final String cadastreWFSUsername = CadastrappPlaceHolder.getProperty("cadastre.wfs.username");
+			final String cadastreWFSPassword = CadastrappPlaceHolder.getProperty("cadastre.wfs.password");
+			if (cadastreWFSUsername != null && !cadastreWFSUsername.isEmpty()
+					&& cadastreWFSUsername != null && !cadastreWFSUsername.isEmpty()){
+				connectionParameters.put(USERNAME_PARAM, cadastreWFSUsername);
+				connectionParameters.put(PASSWORD_PARAM, cadastreWFSPassword);
+			}
+			
 			WFSDataStoreFactory dsf = new WFSDataStoreFactory();
 
-			WFSDataStore dataStore;
+			WFSContentDataStore dataStore;
 
 			try {
 				dataStore = dsf.createDataStore(connectionParameters);
 
 				SimpleFeatureSource source;
 
-				final String cadastreWFSLayerName = CadastrappPlaceHolder.getProperty("cadastre.wfs.layer.name");
+				String cadastreWFSLayerName = CadastrappPlaceHolder.getProperty("cadastre.wfs.layer.name");
+				
+				// TODO remove this if not using gt-wfs-ng anymore
+				// using ng extension : need to be changed by_
+				cadastreWFSLayerName = cadastreWFSLayerName.replaceFirst(":", "_");
 				final String cadastreLayerIdParcelle = CadastrappPlaceHolder.getProperty("cadastre.layer.idParcelle");
 
 				source = dataStore.getFeatureSource(cadastreWFSLayerName);
@@ -225,10 +244,30 @@ public class ImageParcelleController extends CadController {
 						final String cadastreWMSLayerName = CadastrappPlaceHolder.getProperty("cadastre.wms.layer.name");
 
 						URL parcelleWMSUrl = new URL(wmsUrl + URL_GET_CAPABILITIES_WMS);
+						WebMapServer wmsParcelle = null;
 
 						logger.debug("WMS URL : " + parcelleWMSUrl);
-						WebMapServer wmsParcelle = new WebMapServer(parcelleWMSUrl);
-
+						
+						
+						// Add basic authent parameter if not empty
+						final String cadastreWMSUsername = CadastrappPlaceHolder.getProperty("cadastre.wms.username");
+						final String cadastreWMSPassword = CadastrappPlaceHolder.getProperty("cadastre.wms.password");
+						
+						// if authentification is not null
+						if (cadastreWMSUsername != null && !cadastreWMSUsername.isEmpty()
+								&& cadastreWMSPassword != null && !cadastreWMSPassword.isEmpty()){
+							
+							HTTPClient httpClient = new SimpleHttpClient();
+							httpClient.setUser(cadastreWMSUsername);
+							httpClient.setPassword(cadastreWMSPassword);
+							
+							wmsParcelle = new WebMapServer(parcelleWMSUrl, httpClient);
+						}
+						// else without authentification
+						else{
+							wmsParcelle = new WebMapServer(parcelleWMSUrl);
+						}
+						
 						GetMapRequest requestParcelle = wmsParcelle.createGetMapRequest();
 						requestParcelle.setFormat(cadastreFormat);
 
@@ -258,25 +297,40 @@ public class ImageParcelleController extends CadController {
 						Graphics2D g2 = finalImage.createGraphics();
 
 						// Add basemap only if parameter is defined
-						final String baseMapWMSUrl = CadastrappPlaceHolder.getProperty("baseMap.WMS.url");
+						final String baseMapWMSUrl = CadastrappPlaceHolder.getProperty("baseMap.wms.url");
 
 						if (baseMapWMSUrl != null && baseMapWMSUrl.length() > 1) {
 							// Get basemap image with good BBOX
 							try {
 								logger.debug("WMS call for basemap with URL : " + baseMapWMSUrl);
 								URL baseMapUrl = new URL(baseMapWMSUrl);
-								WebMapServer wms = new WebMapServer(baseMapUrl);
+								WebMapServer wms = null;
+								
+								// Add basic authent parameter if not empty
+								final String baseMapWMSUsername = CadastrappPlaceHolder.getProperty("baseMap.wms.username");
+								final String baseMapWMSPassword = CadastrappPlaceHolder.getProperty("baseMap.wms.password");
+								
+								// if authentification is not null
+								if (baseMapWMSUsername != null && !baseMapWMSUsername.isEmpty()
+										&& baseMapWMSPassword != null && !baseMapWMSPassword.isEmpty()){
+									
+									HTTPClient httpClient = new SimpleHttpClient();
+									httpClient.setUser(baseMapWMSUsername);
+									httpClient.setPassword(baseMapWMSPassword);
+									
+									wms = new WebMapServer(baseMapUrl, httpClient);
+								}else{
+									wms = new WebMapServer(baseMapUrl);
+								}
 
 								GetMapRequest request = wms.createGetMapRequest();
-
 								final String baseMapFormat = CadastrappPlaceHolder.getProperty("baseMap.format");
-
 								request.setFormat(baseMapFormat);
 
 								// Add layer see to set this in configuration
 								// parameters
 								// Or use getCapatibilities
-								Layer layer = new Layer("OpenStreetMap : carte style 'google'");
+								Layer layer = new Layer("BaseMap module cadastrapp");
 								final String baseMapLayerName = CadastrappPlaceHolder.getProperty("baseMap.layer.name");
 
 								layer.setName(baseMapLayerName);
