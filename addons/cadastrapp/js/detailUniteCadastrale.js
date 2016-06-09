@@ -458,7 +458,7 @@ GEOR.Addons.Cadastre.displayFIUC = function(parcelleId) {
                 autoLoad : false,
                 method : 'GET'
             }),
-            fields : [ 'comptecommunal', 'dniv', 'dpor', 'ccoaff_lib', 'jannat', 'annee', 'ddenom', 'dnomlp', 'dprnlp', 'epxnee', 'dnomcp', 'dprncp', 'invar', 'dvltrt' ]
+            fields : [ 'comptecommunal', 'dniv', 'dpor', 'ccoaff_lib', 'jannat', 'cconlc', 'dcapec', 'jdatat', 'annee', 'nom', 'ddenom', 'dnomlp', 'dprnlp', 'epxnee', 'dnomcp', 'dprncp', 'invar', 'dvltrt' ]
         });
 
         // Récupère la liste des batiments de la parcelle
@@ -510,7 +510,7 @@ GEOR.Addons.Cadastre.displayFIUC = function(parcelleId) {
             stateful : true,
             name : 'Fiuc_Batiments',
             xtype : 'gridview',
-            autoExpandColumn : 'ddenom',
+            autoExpandColumn : 'nom',
             height : 280,
             autoScroll : true,
             sm : new Ext.grid.RowSelectionModel({
@@ -533,7 +533,7 @@ GEOR.Addons.Cadastre.displayFIUC = function(parcelleId) {
                     dataIndex : 'ccoaff_lib',
                     width : 70
                 }, {
-                    hidden : OpenLayers.i18n('cadastrapp.duc.annee_construction'),
+                    header : OpenLayers.i18n('cadastrapp.duc.annee_construction'),
                     dataIndex : 'jannat',
                     width : 40
                 }, {
@@ -545,34 +545,26 @@ GEOR.Addons.Cadastre.displayFIUC = function(parcelleId) {
                     dataIndex : 'comptecommunal',
                     width : 110
                 }, {
-                    id : 'ddenom',
+                    id : 'nom',
                     header : OpenLayers.i18n('cadastrapp.duc.denomination'),
-                    dataIndex : 'ddenom',
+                    dataIndex : 'nom',
                     width : 200
                 }, {
-                    header : OpenLayers.i18n('cadastrapp.duc.nom'),
-                    dataIndex : 'dnomlp',
+                    header : OpenLayers.i18n('cadastrapp.duc.natlocal'),
+                    dataIndex : 'cconlc',
                     width : 200
                 }, {
-                    header : OpenLayers.i18n('cadastrapp.duc.prenom'),
-                    dataIndex : 'dprnlp',
-                    width : 150
-                }, {
-                    header : OpenLayers.i18n('cadastrapp.duc.mentioncpl'),
-                    dataIndex : 'epxnee',
+                    header : OpenLayers.i18n('cadastrapp.duc.catfisc'),
+                    dataIndex : 'dcapec',
                     width : 100
                 }, {
-                    header : OpenLayers.i18n('cadastrapp.duc.nomcpl'),
-                    dataIndex : 'dnomcp',
-                    width : 200
-                }, {
-                    header : OpenLayers.i18n('cadastrapp.duc.prenomcpl'),
-                    dataIndex : 'dprncp',
-                    width : 150
+                    header : OpenLayers.i18n('cadastrapp.duc.datmutat'),
+                    dataIndex : 'jdatat',
+                    width : 100
                 }, {
                     header : OpenLayers.i18n('cadastrapp.duc.invar'),
                     dataIndex : 'invar',
-                    width : 150
+                    width : 100
                 }, {
                     dataIndex : 'annee',
                     hidden : true

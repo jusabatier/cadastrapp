@@ -388,6 +388,7 @@ GEOR.Addons.Cadastre.initRechercheProprietaire = function() {
                                     alert('Error when getting proprietaire information, check server side');
                                 }
                             });
+                            GEOR.Addons.Cadastre.proprietaireWindow.close();
                         }
 
                     } else {
@@ -465,6 +466,7 @@ GEOR.Addons.Cadastre.initRechercheProprietaire = function() {
                                     }
                                 });
                             }
+                            GEOR.Addons.Cadastre.proprietaireWindow.close();
                         }
                     }
                 }

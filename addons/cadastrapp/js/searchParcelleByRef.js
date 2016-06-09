@@ -559,6 +559,7 @@ GEOR.Addons.Cadastre.initRechercheParcelle = function() {
 
                             }
                         }
+                        GEOR.Addons.Cadastre.rechercheParcelleWindow.close();
                     }
                 }
             }
