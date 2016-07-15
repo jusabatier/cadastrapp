@@ -1,7 +1,5 @@
 -- Create lot Views based on Qgis Models
 
-DROP VIEW cadastrapp_qgis.lot;
-
 CREATE OR REPLACE VIEW #schema_cadastrapp.lot AS 
 	SELECT	lot.id_local, 
 			lot.dnulot, 
@@ -21,4 +19,4 @@ CREATE OR REPLACE VIEW #schema_cadastrapp.lot AS
 			dnumql character varying(7), 
 			ddenql character varying(7));
 
-ALTER TABLE #schema_cadastrapp.lot OWNER TO cadastrapp;
+ALTER TABLE #schema_cadastrapp.lot OWNER TO #user_cadastrapp;
