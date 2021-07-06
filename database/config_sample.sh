@@ -27,7 +27,7 @@ uniqueDB=True
 # True / False
 orgsAutorisations=False
 
-# Obligatoires si orgsAutorisations=False
+# Obligatoires si orgsAutorisations=True
 #ldapUri=ldaps://ldap.georchestra.org
 #ldapPath=ou=orgs,dc=georchestra,dc=org
 #ldapBindDn=uid=cadastrapp,ou=users,dc=lepuyenvelay,dc=fr
