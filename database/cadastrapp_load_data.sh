@@ -47,7 +47,7 @@ else
   exit 1
 fi
 
-if [ "$uniqueDB" = True ] ; then
+if [ "$orgsAutorisations" = True ] ; then
   invalidLdapParam=False
   if [ -z "$ldapUri" ] ; then
     echo "Paramètre ldapUri manquant !"
