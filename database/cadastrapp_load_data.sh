@@ -103,7 +103,7 @@ replaceAndLaunch (){
     s/#DBSchema_qgis/$qgisDBSchema/g
     s/#DBUser_qgis/$qgisDBUser/g
     s/#DBpasswd_qgis/$qgisDBPassword/g
-    s/#ldap_uri/$ldapUri/g
+    s|#ldap_uri|$ldapUri|g
     s/#ldap_path/$ldapPath/g
     s/#ldap_binddn/$ldapBindDn/g
     s/#ldap_bindpwd/$ldapBindPwd/g
