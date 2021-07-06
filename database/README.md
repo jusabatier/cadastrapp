@@ -40,6 +40,39 @@ Dans ce cas on aura 2 bases de données différentes (sur la même machine ou pa
 
 La base de données cible qui contiendra les données de cadastrapp devra comporter l'extension **[dblink](http://www.postgresql.org/docs/current//dblink.html)**.
 
+### Si on souhaite remonter les autorisations geographiques depuis les groupes georchestra
+
+Il faudra que le [fichier de correspondance fourni à la console](https://github.com/georchestra/georchestra/tree/master/console#custom-areas) comporte les codes INSEE des communes.
+
+La base de données cible qui contiendra les données de cadastrapp devra : 
+* Comporter l'extension **[multicorn](https://multicorn.org/)**
+* Avoir accès au serveur LDAP de l'instance geOrchestra
+
+#### Installation de multicorn (Debian)
+
+Dans Debian 10, multicorn est disponible via un paquet : 
+
+`$ sudo apt install postgresql-11-python3-multicorn`
+
+Cette commande est à adapter en fonction de votre version de PostgreSQL.
+
+#### Création du Foreign Data Wrapper pour LDAP
+
+Afin de récupérer les emprises géographiques définies pour l'organisation des utilisateurs, il est necessaire de configurer une connexion de la base de données vers le LDAP de Georchestra.
+
+Commencer par installer l'extension multicorn sur la BDD précedemment créée : 
+
+```
+CREATE EXTENSION multicorn;
+```
+
+Puis, créer le lien vers le serveur LDAP : 
+
+```
+CREATE SERVER ldap_srv foreign data wrapper multicorn options (
+    wrapper 'multicorn.ldapfdw.LdapFdw'
+);
+```
 
 ## Configuration du script
 
@@ -49,6 +82,7 @@ Sous linux :
 * le renommer en `config.sh`
 * l'ouvrir et compléter les informations de connection aux bases de données
 * si les données cadastre QGIS et cadastrapp sont dans la même base de données, laisser `uniqueDB=True` sinon mettre `uniqueDB=False`
+* si vous souhaitez remonter les autorisations cartographiques de puis les organisations geOrchestra (LDAP), mettre `orgsAutorisations=True` sinon laisser `orgsAutorisations=False`
 
 
 ## Utilisation du script
