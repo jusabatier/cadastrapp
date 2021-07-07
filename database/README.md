@@ -72,7 +72,10 @@ Puis, créer le lien vers le serveur LDAP :
 CREATE SERVER ldap_srv foreign data wrapper multicorn options (
     wrapper 'multicorn.ldapfdw.LdapFdw'
 );
+ALTER SERVER ldap_srv
+    OWNER TO #user_cadastrapp;
 ```
+> **Note:** Remplacer `#user_cadastrapp` par l'utilisateur utilisé par cadastrapp
 
 ## Configuration du script
 
