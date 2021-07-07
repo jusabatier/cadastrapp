@@ -104,3 +104,97 @@ Sous linux :
 * exécuter le script `cadastrapp_update_data.sh`
 
 Note : il est possible de l'utiliser en mode silencieux avec l'option `-s` ou `--silent`. Si précisé, le script n'attendra pas de validation de la part de l'utilisateur.
+
+## Mise en place d'un CRON pour rafraichir les autorisations liées aux organisations
+
+Si vous avez mis en place la gestion des autorisations geographiques depuis les groupes georchestra, le script a créé une vue materialisée contenant les codes INSEE pour chaque groupe qui ont été remontés depuis le LDAP.
+Ceci permet de ne pas surcharger ce dernier avec des requêtes à chaque sollicitation de cadastrapp.
+
+Néanmoins, pour que les changements sur les périmètres des organisations faits dans la console geOrchestra soient pris en compte, cette vue materialisée devra être rafraichie.
+
+Pour ce faire, il est conseillé de mettre en place un CRON qui permettra de la rafraichir à interval régulier.
+
+### Mise en place d'un 'cron job' dans debian
+
+Créez un fichier de script `cadastrapp_refresh_ldap_view.sh` avec le contenu suivant :
+
+```
+#!/bin/sh
+psql -U #user_cadastrapp -d #cadastrappDBName -c 'refresh materialized view #cadastrapp_schema.org_autorisation'
+```
+> **Note:** Remplacez les variables précédées d'un `#` par la valeur appropriée
+
+Déplacez le fichier dans le répertoire cron correspondant à la fréquence souhaitée :
+
+* /etc/cron.hourly => toutes les heures
+* /etc/cron.daily => tous les jours
+* /etc/cron.weekly => toutes les semaines
+* /etc/cron.monthly => tous les mois
+
+Ou bien si vous souhaitez un parametrage plus poussé, référez vous à la [documentation de crontab](https://debian-facile.org/doc:systeme:crontab)
+
+Enfin pensez-bien à rendre le fichier executable : 
+
+```
+chmod +x cadastrapp_refresh_ldap_view.sh
+```
+
+### Mise en place d'un 'cron job' via pg_cron
+
+Commencez par installer l'extension `cron` de postgresql : 
+
+```
+sudo apt install postgresql-11-cron
+```
+
+Une fois installée, partie OS, il faudra modifier les paramètres base de données dans PostgreSQL afin de pouvoir utiliser cette extension.
+
+Le fichier “postgresql.conf” devra indiquer les éléments suivants pour permettre la création de cette extension en base :
+
+* share_preload_libraries
+* cron.database_name
+
+```
+sudo nano /etc/postgesql/11/main/postgresql.conf
+```
+
+Ajoutez à la fin du fichier : 
+
+```
+shared_preload_libraries = 'pg_cron'
+cron.database_name = '#cadastrappDBName'
+```
+
+> **Note:** Remplacez `#cadastrappDBName` par le nom de la base de donnée hébergeant cadastrapp
+
+Autorisez la connexion de l'utilisateur en local via trust pour permettre l'accès à la tache CRON,
+pour cela dans le fichier `/etc/postgresql/11/main/pg_hba.conf` ajoutez la ligne : 
+
+```
+host    #cadastrappDBName        #cadastrapp_schema      127.0.0.1/32            trust
+```
+> **Note:** Remplacez les variables précédées d'un `#` par la valeur appropriée
+
+Relancez postgresql : 
+
+```
+sudo service postgresql restart
+```
+
+Activez l'extention dans la base de donnée hebergeant cadastrapp : 
+
+```
+CREATE EXTENSION pg_cron;
+```
+
+Autorisez l'utilisation pour l'utilisateur cadastrapp : 
+
+```
+GRANT USAGE ON SCHEMA cron TO #user_cadastrapp;
+```
+
+Enfin lancez le script de definition la tache CRON : 
+
+```
+./create_ldap_cronjob.sh
+```
