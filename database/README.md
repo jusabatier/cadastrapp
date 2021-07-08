@@ -192,7 +192,9 @@ Autorisez l'utilisation pour l'utilisateur cadastrapp :
 
 ```
 GRANT USAGE ON SCHEMA cron TO #user_cadastrapp;
+GRANT INSERT ON TABLE cron.job TO #user_cadastrapp;
 ```
+> **Note:** Remplacer `#user_cadastrapp` par l'utilisateur utilisé par cadastrapp
 
 Enfin lancez le script de definition la tache CRON : 
 
