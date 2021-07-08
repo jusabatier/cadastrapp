@@ -116,11 +116,11 @@ Pour ce faire, il est conseillé de mettre en place un CRON qui permettra de la 
 
 ### Mise en place d'un 'cron job' dans debian
 
-Créez un fichier de script `cadastrapp_refresh_ldap_view.sh` avec le contenu suivant :
+Créez un fichier de script `cadastrapp_refresh_ldap_view.sh` sur le serveur contenant la base de données cadastrapp avec le contenu suivant :
 
 ```
 #!/bin/sh
-psql -U #user_cadastrapp -d #cadastrappDBName -c 'refresh materialized view #cadastrapp_schema.org_autorisation'
+PGPASSWORD=#cadastrapp_password psql -h #cadastrapp_db_host -p $cadastrapp_db_port -d $cadastrapp_db_name -U $cadastrapp_user -c 'refresh materialized view #cadastrapp_schema.org_autorisation'
 ```
 > **Note:** Remplacez les variables précédées d'un `#` par la valeur appropriée
 
