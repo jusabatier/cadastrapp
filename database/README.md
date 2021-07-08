@@ -171,7 +171,7 @@ Autorisez la connexion de l'utilisateur en local via trust pour permettre l'acc�
 pour cela dans le fichier `/etc/postgresql/11/main/pg_hba.conf` ajoutez la ligne : 
 
 ```
-host    #cadastrappDBName        #cadastrapp_schema      127.0.0.1/32            trust
+host     #cadastrappDBName         #user_cadastrapp       127.0.0.1/32            trust
 ```
 > **Note:** Remplacez les variables précédées d'un `#` par la valeur appropriée
 
