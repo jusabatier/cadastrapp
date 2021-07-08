@@ -168,10 +168,11 @@ cron.database_name = '#cadastrappDBName'
 > **Note:** Remplacez `#cadastrappDBName` par le nom de la base de donnée hébergeant cadastrapp
 
 Autorisez la connexion de l'utilisateur en local via trust pour permettre l'accès à la tache CRON,
-pour cela dans le fichier `/etc/postgresql/11/main/pg_hba.conf` ajoutez la ligne : 
+pour cela dans le fichier `/etc/postgresql/11/main/pg_hba.conf` modifiez la ligne : 
 
 ```
-host     #cadastrappDBName         #user_cadastrapp       127.0.0.1/32            trust
+host    #cadastrappDBName   #user_cadastrapp    127.0.0.1/32            trust
+host    all                 all                 127.0.0.1/32            md5
 ```
 > **Note:** Remplacez les variables précédées d'un `#` par la valeur appropriée
 
